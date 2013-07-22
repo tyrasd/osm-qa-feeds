@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>osm qa feeds</title>
+    <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.6.3/leaflet.css" />
+    <!--[if lte IE 8]><link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.6.3/leaflet.ie.css" /><![endif]-->
+    <script src="http://cdn.leafletjs.com/leaflet-0.6.3/leaflet.js"></script>
+    <script src="http://code.jquery.com/jquery-1.10.1.min.js"></script>
+    <link type="text/css" href="http://code.jquery.com/ui/1.10.0/themes/base/jquery-ui.css" rel="Stylesheet" />
+    <script src="http://code.jquery.com/ui/1.10.0/jquery-ui.min.js"></script>
+    <link href="libs/locationfilter.css" rel="stylesheet" />
+    <script src="libs/locationfilter.js"></script>
+    <style>
+      body {
+        max-width:40em;
+        margin:auto;
+      }
+      div#map {
+        position:absolute;
+        top:0;left:0;right:0;bottom:0;
+      }
+      div.box {
+        left:4em;
+        background-color:rgba(250,250,250,0.7);
+        border-radius:5px;
+        padding:1em;
+        margin-top:1em;
+        opacity:0.99;
+      }
+      .hidden {
+        display:none;
+      }
+      #list li {
+        list-style-type: none;
+        margin-bottom:0.3em;
+      }
+      #list li a {
+        padding: 0 0 0 19px;
+        background: url("libs/img/feed-icon-14x14.png") no-repeat 0 50%;
+      }
+      .ui-autocomplete {
+        max-width: 32em;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="map"></div>
+
+    <div class="box">Get a list of <a href="http://openstreetmap.org"/>OpenStreetMap</a> quality assurance feeds for an area of your choice.</div>
+
+    <div class="box" id="search-box">
+      <p>Enter any place name (e.g. a city or region):</p>
+      <input type="text" value="" id="search" style="width:16em;"><input type="button" value="search" onclick="$('input#search').autocomplete('search');"/>
+    </div>
+    <div class="box hidden" id="adjust-box">
+      <p>Adjust bounding box.</p>
+      <input type="button" value="continue" id="adjusted"/>
+    </div>
+    <div class="box hidden" id="result-box">
+      <h3>Your personalized OSM quality assurance feeds for <span id="searched"></span>:</h3>
+      <ul id="list">
+      </ul>
+      <input type="button" value="start over" id="again"/>
+    </div>
+
+    <script>
+    // list of quality assurance tools:
+    var qa_tools = [
+      {
+        label: "OSM notes",
+        note: "User generated bug reports",
+        url: "http://www.openstreetmap.org/api/0.6/notes/feed?bbox={lon1},{lat1},{lon2},{lat2}"
+      },
+      {
+        label: "WhoDidIt",
+        note: "Changeset analyzer",
+        url: "http://zverik.osm.rambler.ru/whodidit/scripts/rss.php?bbox={lon1},{lat1},{lon2},{lat2}"
+      },
+      {
+        label: "newestosm",
+        note: "Lists new contributors. (Max. area approx. (100km)²)",
+        url: "http://resultmaps.neis-one.org/newestosmfeed.php?lon={lonc}&lat={latc}&deg={delta_deg}"
+      },
+      {
+        label: "OpenStreetBugs",
+        note: "like OSM-notes, but deprecated – use OSM notes instead",
+        url: "http://openstreetbugs.schokokeks.org/api/0.1/getRSSfeed?b={lon1}&t={lon2}&l={lat1}&r={lat2}"
+      }
+    ];
+    function construct_url(url,bbox) {
+      var lon1 = Math.round(bbox.getWest()*10000000)/10000000;;
+      var lon2 = Math.round(bbox.getEast()*10000000)/10000000;;
+      var lat1 = Math.round(bbox.getSouth()*10000000)/10000000;;
+      var lat2 = Math.round(bbox.getNorth()*10000000)/10000000;;
+      var lonc = Math.round((lon1+lon2)/2*10000000)/10000000;;
+      var latc = Math.round((lat1+lat2)/2*10000000)/10000000;
+      var delta_deg = Math.min(1, Math.round(Math.max(lat2-lat1,lon2-lon1)*100)/100);
+      return url
+        .replace("{lat1}", lat1)
+        .replace("{lat2}", lat2)
+        .replace("{lon1}", lon1)
+        .replace("{lon2}", lon2)
+        .replace("{latc}", latc)
+        .replace("{lonc}", lonc)
+        .replace("{delta_deg}", delta_deg)
+      ;
+    }
+    $(function(e) {
+      var map = L.map('map', {
+        zoomControl:false
+      }).setView([0, 0], 1);
+      L.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://openstreetmap.org/license">ODbL</a>',
+        maxZoom: 18
+      }).addTo(map);
+      var locationFilter = new L.LocationFilter({
+        enable:false,
+        adjustButton:false,
+        enableButton:false
+      }).addTo(map);
+      $("input#search").autocomplete({
+      //on("submit", function() {
+        source: function(request,response) {
+          // show search string in result title
+          $("#searched").text($("input#search")[0].value);
+          // search it using nominatim
+          $.ajax("http://nominatim.openstreetmap.org/search", {
+            data: {
+              format: "json",
+              q: $("input#search")[0].value
+            },
+            dataType: "json"
+          }).success(function(data) {
+            response($.map(data,function(item) {
+              return {
+                label: item.display_name,
+                value: item.display_name,
+                bbox: item.boundingbox
+              }
+            }));
+          }).error(function() {
+            alert("nominatim error :(");
+          });
+        },
+        minLength:2,
+        select: function(event,ui) {
+          $("#search-box").hide();
+          $("#adjust-box").slideDown();
+          var bb = ui.item.bbox;
+          bb = L.latLngBounds([bb[1],bb[3]],[bb[0],bb[2]]);
+          map.fitBounds(bb);
+          locationFilter.setBounds(bb);
+          locationFilter.enable();
+          this.value="";
+          return false;
+        }
+      });
+      $("input#search").autocomplete("option","delay",2000000000); // do not do this at all
+      $("input#search").autocomplete().keypress(function(e) {
+        if (e.which==13) $(this).autocomplete("search");
+      });
+      $("input#adjusted").on("click", function() {
+        var bb = locationFilter.getBounds();
+        locationFilter.disable();
+        $("#adjust-box").hide();
+        $("#result-box").slideDown();
+        //print list of qa tools
+        $("#list").empty();
+        for (var i=0; i<qa_tools.length; i++) {
+          qa_tool = qa_tools[i];
+          $("<li><a href='"+construct_url(qa_tool.url,bb)+"'>"+qa_tool.label+"</a>"+(qa_tool.note?": <small>"+qa_tool.note+"</small>":"")+"</li>").appendTo("#list");
+        }
+      });
+      $("input#again").on("click", function() {
+        $("#result-box").hide();
+        $("input#search")[0].value = "";
+        $("#search-box").slideDown();
+      });
+    });
+    </script>
+  </body>
+</html>
