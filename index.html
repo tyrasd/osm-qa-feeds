@@ -36,7 +36,8 @@
         margin-bottom:0.3em;
       }
       #list li a {
-        padding: 0 0 0 19px;
+        margin: 0 0 0 -24px;
+        padding: 0 0 0 24px;
         background: url("libs/img/feed-icon-14x14.png") no-repeat 0 50%;
       }
       .ui-autocomplete {
@@ -169,7 +170,13 @@
         $("#list").empty();
         for (var i=0; i<qa_tools.length; i++) {
           qa_tool = qa_tools[i];
-          $("<li><a href='"+construct_url(qa_tool.url,bb)+"'>"+qa_tool.label+"</a>"+(qa_tool.note?": <small>"+qa_tool.note+"</small>":"")+"</li>").appendTo("#list");
+          $("<li>"
+            +"<h4><a href='"+construct_url(qa_tool.url,bb)+"'>"+qa_tool.label+"</a></h4>"
+            +(qa_tool.note?
+              "<p>"+qa_tool.note+"</p>":
+              "")
+            +"</li>")
+          .appendTo("#list");
         }
       });
       $("input#again").on("click", function() {
