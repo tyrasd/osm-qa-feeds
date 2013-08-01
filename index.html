@@ -50,6 +50,12 @@
       p,h3 {
         margin-top:0;
       }
+      h4 {
+        margin-bottom:0.3em;
+      }
+      a {
+        text-decoration: none;
+      }
     </style>
   </head>
   <body>
@@ -62,11 +68,11 @@
       <input type="text" value="" id="search" style="width:16em;"><input type="button" value="search" onclick="$('input#search').autocomplete('search');"/>
     </div>
     <div class="box hidden" id="adjust-box">
-      <p>Adjust bounding box.</p>
+      <p>Adjust bounding box (optional).</p>
       <input type="button" value="continue" id="adjusted"/>
     </div>
     <div class="box hidden" id="result-box">
-      <h3>Your personalized OSM quality assurance feeds for <span id="searched"></span>:</h3>
+      <h3>Your personal OSM quality assurance feeds for <span id="searched"></span>:</h3>
       <ul id="list">
       </ul>
       <input type="button" value="start over" id="again"/>
@@ -131,6 +137,7 @@
       ;
     }
     $(function(e) {
+      $("input#search").focus();
       var map = L.map('map', {
         zoomControl:false
       }).setView([0, 0], 1);
@@ -209,6 +216,7 @@
         $("#result-box").hide();
         $("input#search")[0].value = "";
         $("#search-box").slideDown();
+        $("input#search").focus();
       });
     });
     </script>
