@@ -15,6 +15,7 @@
       body {
         max-width:40em;
         margin:auto;
+        font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
       }
       div#map {
         position:absolute;
@@ -35,13 +36,19 @@
         list-style-type: none;
         margin-bottom:0.3em;
       }
-      #list li a {
+      #list li h4 a {
         margin: 0 0 0 -24px;
         padding: 0 0 0 24px;
         background: url("libs/img/feed-icon-14x14.png") no-repeat 0 50%;
       }
       .ui-autocomplete {
         max-width: 32em;
+      }
+      #searched {
+        font-style:italic;
+      }
+      p,h3 {
+        margin-top:0;
       }
     </style>
   </head>
@@ -67,29 +74,45 @@
 
     <script>
     // list of quality assurance tools:
-    var qa_tools = [
+    var qaTools = [
       {
         label: "OSM notes",
-        note: "User generated bug reports",
-        url: "http://www.openstreetmap.org/api/0.6/notes/feed?bbox={lon1},{lat1},{lon2},{lat2}"
+        note: "User generated bug reports.",
+        docUrl: "http://wiki.openstreetmap.org/wiki/Notes",
+        feedUrl: "http://www.openstreetmap.org/api/0.6/notes/feed?bbox={lon1},{lat1},{lon2},{lat2}"
       },
       {
         label: "WhoDidIt",
-        note: "Changeset analyzer",
-        url: "http://zverik.osm.rambler.ru/whodidit/scripts/rss.php?bbox={lon1},{lat1},{lon2},{lat2}"
+        note: "Changeset analyzer.",
+        docUrl: "http://wiki.openstreetmap.org/wiki/Quality_assurance#WhoDidIt",
+        feedUrl: "http://zverik.osm.rambler.ru/whodidit/scripts/rss.php?bbox={lon1},{lat1},{lon2},{lat2}"
       },
       {
         label: "newestosm",
-        note: "Lists new contributors. (Max. area approx. (100km)²)",
-        url: "http://resultmaps.neis-one.org/newestosmfeed.php?lon={lonc}&lat={latc}&deg={delta_deg}"
+        note: "Lists new contributors. (Max. area approx. (100km)²).",
+        docUrl: "http://neis-one.org/2012/04/where-are-the-new-openstreetmap-contributors/",
+        feedUrl: "http://resultmaps.neis-one.org/newestosmfeed.php?lon={lonc}&lat={latc}&deg={delta_deg}"
       },
       {
         label: "OpenStreetBugs",
-        note: "like OSM-notes, but deprecated – use OSM notes instead",
-        url: "http://openstreetbugs.schokokeks.org/api/0.1/getRSSfeed?b={lon1}&t={lon2}&l={lat1}&r={lat2}"
-      }
+        note: "Like OSM-notes, but deprecated – use OSM notes instead.",
+        docUrl: "http://wiki.openstreetmap.org/wiki/OpenStreetBugs",
+        feedUrl: "http://openstreetbugs.schokokeks.org/api/0.1/getRSSfeed?b={lon1}&t={lon2}&l={lat1}&r={lat2}"
+      } 
+      // add more qa tools here:
+      /*{
+        label: "<the name of the service>",
+        note: "<a short description of what it does>",
+        docUrl: "<an url to some documentation (displayed as a 'read more' link)>",
+        feedUrl: "<the url to the actual rss/atom feed of the qa tool. see constructFeedUrl() for usable expansions>"
+      }*/
     ];
-    function construct_url(url,bbox) {
+    function constructFeedUrl(url,bbox) {
+      /* this expands the following map coordinates in the feed urls:
+       - {lat1},{lat2},{lon1},{lon2}: bounding box
+       - {latc},{lonc}: the center of the bbox
+       - {delta_deg}: max. width or height of the bbox in degrees (truncated to max. 1 deg)
+      */
       var lon1 = Math.round(bbox.getWest()*10000000)/10000000;;
       var lon2 = Math.round(bbox.getEast()*10000000)/10000000;;
       var lat1 = Math.round(bbox.getSouth()*10000000)/10000000;;
@@ -168,12 +191,15 @@
         $("#result-box").slideDown();
         //print list of qa tools
         $("#list").empty();
-        for (var i=0; i<qa_tools.length; i++) {
-          qa_tool = qa_tools[i];
+        for (var i=0; i<qaTools.length; i++) {
+          qaTool = qaTools[i];
           $("<li>"
-            +"<h4><a href='"+construct_url(qa_tool.url,bb)+"'>"+qa_tool.label+"</a></h4>"
-            +(qa_tool.note?
-              "<p>"+qa_tool.note+"</p>":
+            +"<h4><a href='"+constructFeedUrl(qaTool.feedUrl,bb)+"'>"+qaTool.label+"</a></h4>"
+            +(qaTool.note||qaTool.docUrl?
+              "<p>"
+              +(qaTool.note||"")
+              +(qaTool.docUrl ? "<br><a href='" + qaTool.docUrl + "'>read more</a>" : "")
+              +"</p>":
               "")
             +"</li>")
           .appendTo("#list");
