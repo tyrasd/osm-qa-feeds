@@ -159,6 +159,16 @@
         adjustButton:false,
         enableButton:false
       }).addTo(map);
+      var select_bbox = function(bb) {
+        $("#search-box").hide();
+        $("#adjust-box").slideDown();
+        bb = L.latLngBounds([bb[1],bb[3]],[bb[0],bb[2]]);
+        map.fitBounds(bb);
+        locationFilter.setBounds(bb);
+        locationFilter.enable();
+        this.value="";
+        return false;
+      }
       $("input#search").autocomplete({
       //on("submit", function() {
         source: function(request,response) {
@@ -172,28 +182,24 @@
             },
             dataType: "json"
           }).success(function(data) {
-            response($.map(data,function(item) {
-              return {
-                label: item.display_name,
-                value: item.display_name,
-                bbox: item.boundingbox
-              }
-            }));
+            if (data.length == 1) {
+              select_bbox(data[0].boundingbox);
+            } else {
+              response($.map(data,function(item) {
+                return {
+                  label: item.display_name,
+                  value: item.display_name,
+                  bbox: item.boundingbox
+                }
+              }));
+            }
           }).error(function() {
             alert("nominatim error :(");
           });
         },
         minLength:2,
-        select: function(event,ui) {
-          $("#search-box").hide();
-          $("#adjust-box").slideDown();
-          var bb = ui.item.bbox;
-          bb = L.latLngBounds([bb[1],bb[3]],[bb[0],bb[2]]);
-          map.fitBounds(bb);
-          locationFilter.setBounds(bb);
-          locationFilter.enable();
-          this.value="";
-          return false;
+        select: function(event, ui) {
+          select_bbox(ui.item.bbox);
         }
       });
       $("input#search").autocomplete("option","delay",2000000000); // do not do this at all
