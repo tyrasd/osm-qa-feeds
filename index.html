@@ -3,9 +3,9 @@
   <head>
     <title>osm qa feeds</title>
     <meta http-equiv="content-type" content="text/html; charset=utf-8" lang="en"></meta>
-    <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.6.3/leaflet.css" />
+    <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.6.4/leaflet.css" />
     <!--[if lte IE 8]><link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.6.3/leaflet.ie.css" /><![endif]-->
-    <script src="http://cdn.leafletjs.com/leaflet-0.6.3/leaflet.js"></script>
+    <script src="http://cdn.leafletjs.com/leaflet-0.6.4/leaflet.js"></script>
     <script src="http://code.jquery.com/jquery-1.10.1.min.js"></script>
     <link type="text/css" href="http://code.jquery.com/ui/1.10.0/themes/base/jquery-ui.css" rel="Stylesheet" />
     <script src="http://code.jquery.com/ui/1.10.0/jquery-ui.min.js"></script>
@@ -149,7 +149,7 @@
       $("input#search").focus();
       var map = L.map('map', {
         zoomControl:false
-      }).setView([0, 0], 1);
+      }).setView([0, 0], 2);
       L.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://openstreetmap.org/license">ODbL</a>',
         maxZoom: 18
