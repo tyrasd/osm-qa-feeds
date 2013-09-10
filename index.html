@@ -135,11 +135,11 @@
        - {latc},{lonc}: the center of the bbox
        - {delta_deg}: max. width or height of the bbox in degrees (truncated to max. 1 deg)
       */
-      var lon1 = Math.round(bbox.getWest()*10000000)/10000000;;
-      var lon2 = Math.round(bbox.getEast()*10000000)/10000000;;
-      var lat1 = Math.round(bbox.getSouth()*10000000)/10000000;;
-      var lat2 = Math.round(bbox.getNorth()*10000000)/10000000;;
-      var lonc = Math.round((lon1+lon2)/2*10000000)/10000000;;
+      var lon1 = Math.round(bbox.getWest()*10000000)/10000000;
+      var lon2 = Math.round(bbox.getEast()*10000000)/10000000;
+      var lat1 = Math.round(bbox.getSouth()*10000000)/10000000;
+      var lat2 = Math.round(bbox.getNorth()*10000000)/10000000;
+      var lonc = Math.round((lon1+lon2)/2*10000000)/10000000;
       var latc = Math.round((lat1+lat2)/2*10000000)/10000000;
       var delta_deg = Math.min(1, Math.round(Math.max(lat2-lat1,lon2-lon1)*100)/100);
       return url
@@ -166,15 +166,24 @@
         adjustButton:false,
         enableButton:false
       }).addTo(map);
-      var select_bbox = function(bb) {
+      function select_bbox(bb) {
         $("#search-box").hide();
         $("#adjust-box").slideDown();
-        bb = L.latLngBounds([bb[1],bb[3]],[bb[0],bb[2]]);
         map.fitBounds(bb);
         locationFilter.setBounds(bb);
         locationFilter.enable();
         this.value="";
         return false;
+      }
+      function sanitize_bbox(bb) {
+        bb = L.latLngBounds([bb[1],bb[3]],[bb[0],bb[2]]);
+        var d = 0.001;
+        if (Math.min(bb.getEast() - bb.getWest(), bb.getNorth() - bb.getSouth()) <= 2*d) {
+          var center = bb.getCenter();
+          return L.latLngBounds([center.lat-d,center.lng-d],[center.lat+d,center.lng+d]);
+        } else {
+          return bb;
+        }
       }
       $("input#search").autocomplete({
       //on("submit", function() {
@@ -190,7 +199,7 @@
             dataType: "json"
           }).success(function(data) {
             if (data.length == 1) {
-              select_bbox(data[0].boundingbox);
+              select_bbox(sanitize_bbox(data[0].boundingbox));
             } else {
               response($.map(data,function(item) {
                 return {
@@ -206,7 +215,7 @@
         },
         minLength:2,
         select: function(event, ui) {
-          select_bbox(ui.item.bbox);
+          select_bbox(sanitize_bbox(ui.item.bbox));
         }
       });
       $("input#search").autocomplete("option","delay",2000000000); // do not do this at all
