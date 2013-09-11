@@ -120,7 +120,12 @@
         note: "Like OSM-notes, but deprecated.",
         docUrl: "http://wiki.openstreetmap.org/wiki/OpenStreetBugs",
         feedUrl: "http://openstreetbugs.schokokeks.org/api/0.1/getRSSfeed?b={lon1}&t={lon2}&l={lat1}&r={lat2}"
-      } 
+      },
+      {
+        label: "ITO - OSM Mapper",
+        note: "Displays mapping activity (free sign up required)",
+        docUrl: "http://www.itoworld.com/static/openstreetmap_tools/osm_mapper.html"
+      }
       // add more qa tools here:
       /*{
         label: "<the name of the service>",
@@ -232,7 +237,11 @@
         for (var i=0; i<qaTools.length; i++) {
           qaTool = qaTools[i];
           $("<li>"
-            +"<h4><a href='"+constructFeedUrl(qaTool.feedUrl,bb)+"'>"+qaTool.label+"</a></h4>"
+            +"<h4>"
+            +(qaTool.feedUrl?
+              "<a href='"+constructFeedUrl(qaTool.feedUrl,bb)+"'>"+qaTool.label+"</a>":
+              qaTool.label)
+            +"</h4>"
             +(qaTool.note||qaTool.docUrl?
               "<p>"
               +(qaTool.note||"")
