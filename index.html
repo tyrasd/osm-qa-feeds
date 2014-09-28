@@ -162,6 +162,7 @@
       var map = L.map('map', {
         zoomControl:false
       }).setView([0, 0], 2);
+      var zoomControl = L.control.zoom({position: "topright"});
       L.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://openstreetmap.org/license">ODbL</a>',
         maxZoom: 18
@@ -177,6 +178,7 @@
         map.fitBounds(bb);
         locationFilter.setBounds(bb);
         locationFilter.enable();
+        zoomControl.addTo(map);
         this.value="";
         return false;
       }
@@ -230,6 +232,7 @@
       $("input#adjusted").on("click", function() {
         var bb = locationFilter.getBounds();
         locationFilter.disable();
+        zoomControl.removeFrom(map);
         $("#adjust-box").hide();
         $("#result-box").slideDown();
         //print list of qa tools
