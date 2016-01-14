@@ -3,12 +3,11 @@
   <head>
     <title>osm qa feeds</title>
     <meta http-equiv="content-type" content="text/html; charset=utf-8" lang="en"></meta>
-    <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.6.4/leaflet.css" />
-    <!--[if lte IE 8]><link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.6.4/leaflet.ie.css" /><![endif]-->
-    <script src="http://cdn.leafletjs.com/leaflet-0.6.4/leaflet.js"></script>
-    <script src="http://code.jquery.com/jquery-1.10.2.min.js"></script>
-    <link type="text/css" href="http://code.jquery.com/ui/1.10.3/themes/smoothness/jquery-ui.css" rel="Stylesheet" />
-    <script src="http://code.jquery.com/ui/1.10.3/jquery-ui.min.js"></script>
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/leaflet.css" />
+    <script src="//cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/leaflet.js"></script>
+    <script src="//code.jquery.com/jquery-1.10.2.min.js"></script>
+    <link type="text/css" href="//code.jquery.com/ui/1.10.3/themes/smoothness/jquery-ui.css" rel="Stylesheet" />
+    <script src="//code.jquery.com/ui/1.10.3/jquery-ui.min.js"></script>
     <link href="libs/locationfilter.css" rel="stylesheet" />
     <script src="libs/locationfilter.js"></script>
     <style>
@@ -71,7 +70,7 @@
   <body>
     <div id="map"></div>
 
-    <div class="box">Get a list of <a href="http://openstreetmap.org"/>OpenStreetMap</a> quality assurance feeds for an area of your choice.</div>
+    <div class="box">Get a list of <a href="//openstreetmap.org"/>OpenStreetMap</a> quality assurance feeds for an area of your choice.</div>
 
     <div class="box" id="search-box">
       <p>Enter any place name (e.g. a city or region):</p>
@@ -164,8 +163,8 @@
         zoomControl:false
       }).setView([0, 0], 2);
       var zoomControl = L.control.zoom({position: "topright"});
-      L.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://openstreetmap.org/license">ODbL</a>',
+      L.tileLayer('//{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: 'Map data &copy; <a href="//openstreetmap.org">OpenStreetMap</a> contributors, <a href="//openstreetmap.org/license">ODbL</a>',
         maxZoom: 18
       }).addTo(map);
       var locationFilter = new L.LocationFilter({
@@ -199,7 +198,7 @@
           // show search string in result title
           $("#searched").text($("input#search")[0].value);
           // search it using nominatim
-          $.ajax("http://nominatim.openstreetmap.org/search", {
+          $.ajax("//nominatim.openstreetmap.org/search", {
             data: {
               format: "json",
               q: $("input#search")[0].value
