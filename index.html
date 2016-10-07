@@ -74,7 +74,8 @@
 
     <div class="box" id="search-box">
       <p>Enter any place name (e.g. a city or region):</p>
-      <input type="text" autofocus="autofocus" placeholder="city, region, etc." value="" id="search" style="width:16em;"><input type="button" value="search" onclick="$('input#search').autocomplete('search');"/>
+      <input autocomplete="off" id="search" type="text" placeholder="city, region, etc." style="width:16em;" />
+      <input type="button" value="search" onclick="$('input#search').autocomplete('search');"/>
     </div>
     <div class="box hidden" id="adjust-box">
       <p>Adjust bounding box (optional).</p>
@@ -183,7 +184,7 @@
         return false;
       }
       function sanitize_bbox(bb) {
-        bb = L.latLngBounds([bb[1],bb[3]],[bb[0],bb[2]]);
+        bb = L.latLngBounds([bb[1],bb[0]],[bb[3],bb[2]]);
         var d = 0.001;
         if (Math.min(bb.getEast() - bb.getWest(), bb.getNorth() - bb.getSouth()) <= 2*d) {
           var center = bb.getCenter();
@@ -198,13 +199,14 @@
           // show search string in result title
           $("#searched").text($("input#search")[0].value);
           // search it using nominatim
-          $.ajax("//nominatim.openstreetmap.org/search", {
+          $.ajax("https://search.osmnames.org/q/"+encodeURIComponent(request.term)+".js?key=WEFgf7dvvnjb8mKT5z1k", {
             data: {
               format: "json",
               q: $("input#search")[0].value
             },
             dataType: "json"
           }).success(function(data) {
+            data = data.results.slice(0,10);
             if (data.length == 1) {
               select_bbox(sanitize_bbox(data[0].boundingbox));
             } else {
@@ -221,11 +223,12 @@
           });
         },
         minLength:2,
+        autoFocus:true,
         select: function(event, ui) {
           select_bbox(sanitize_bbox(ui.item.bbox));
         }
       });
-      $("input#search").autocomplete("option","delay",2000000000); // do not do this at all
+      $("input#search").autocomplete("option","delay",20);
       $("input#search").autocomplete().keypress(function(e) {
         if (e.which==13) $(this).autocomplete("search");
       });
