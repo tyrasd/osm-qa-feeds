@@ -8,4 +8,5 @@ Currently supported feed providers:
 * [whodidit](http://wiki.openstreetmap.org/wiki/Quality_assurance#WhoDidIt)
 * [newestosm](http://neis-one.org/2012/07/new-contributor-feed/)
 * [KeepRight!](http://wiki.openstreetmap.org/wiki/Keepright)
-* [OpenStreetBugs](http://wiki.openstreetmap.org/wiki/OpenStreetBugs)
+* [Osmose QA](http://wiki.openstreetmap.org/wiki/Osmose)
+* [(GB only) OS Locator Musical Chairs](http://wiki.openstreetmap.org/wiki/OS_Locator_Musical_Chairs)
