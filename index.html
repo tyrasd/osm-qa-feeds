@@ -122,19 +122,22 @@
         feedUrl: "http://osmose.openstreetmap.fr/en/errors.rss?item=xxxx&level=1%2C2&tags=&fixable=&bbox={lon1},{lat1},{lon2},{lat2}"
       },
       {
-        label: "(GB) OS Locator Musical Chairs",
-        note: "Great Britain only: highlights disagreements between <a href=\"http://wiki.openstreetmap.org/wiki/OS_Locator\"OS Locator and OSM.",
+        label: "(GB only) OS Locator Musical Chairs",
+        note: "Great Britain only: highlights disagreements between <a href=\"http://wiki.openstreetmap.org/wiki/OS_Locator\">Ordnance Survey Opendata</a> and OSM.",
         docUrl: "http://wiki.openstreetmap.org/wiki/OS_Locator_Musical_Chairs",
-        feedUrl: "http://ris.dev.openstreetmap.org/oslmusicalchairs/rss/relevant_downgrades?bbox={lon1},{lat1},{lon2},{lat2}"
+        feedUrl: "http://ris.dev.openstreetmap.org/oslmusicalchairs/rss/relevant_downgrades?bbox={lon1},{lat1},{lon2},{lat2}",
+        countryCodes: ["gb"]
       }
       // add more qa tools here:
       /*{
         label: "<the name of the service>",
         note: "<a short description of what it does>",
         docUrl: "<an url to some documentation (displayed as a 'read more' link)>",
-        feedUrl: "<the url to the actual rss/atom feed of the qa tool. see constructFeedUrl() for usable expansions>"
+        feedUrl: "<the url to the actual rss/atom feed of the qa tool. see constructFeedUrl() for usable expansions>".
+        countryCodes: <array of supported country codes, optional, e.g. ['de', 'at', 'ch']>
       }*/
     ];
+    var supportedQATools = [];
     function constructFeedUrl(url,bbox) {
       /* this expands the following map coordinates in the feed urls:
        - {lat1},{lat2},{lon1},{lon2}: bounding box
@@ -173,7 +176,7 @@
         adjustButton:false,
         enableButton:false
       }).addTo(map);
-      function select_bbox(bb) {
+      function select_bbox(bb, country) {
         $("#search-box").hide();
         $("#adjust-box").slideDown();
         map.fitBounds(bb);
@@ -181,6 +184,9 @@
         locationFilter.enable();
         zoomControl.addTo(map);
         this.value="";
+        supportedQATools = qaTools.filter(function(qaTool) {
+          return !qaTool.countryCodes || qaTool.countryCodes.indexOf(country) >= 0;
+        });
         return false;
       }
       function sanitize_bbox(bb) {
@@ -207,25 +213,22 @@
             dataType: "json"
           }).success(function(data) {
             data = data.results.slice(0,10);
-            if (data.length == 1) {
-              select_bbox(sanitize_bbox(data[0].boundingbox));
-            } else {
-              response($.map(data,function(item) {
-                return {
-                  label: item.display_name,
-                  value: item.display_name,
-                  bbox: item.boundingbox
-                }
-              }));
-            }
+            response($.map(data,function(item) {
+              return {
+                label: item.display_name,
+                value: item.display_name,
+                country_code: item.country_code,
+                bbox: item.boundingbox
+              }
+            }));
           }).error(function() {
-            alert("nominatim error :(");
+            alert("geocoding (osmnames) error :(");
           });
         },
         minLength:2,
         autoFocus:true,
         select: function(event, ui) {
-          select_bbox(sanitize_bbox(ui.item.bbox));
+          select_bbox(sanitize_bbox(ui.item.bbox), ui.item.country_code);
         }
       });
       $("input#search").autocomplete("option","delay",20);
@@ -240,8 +243,8 @@
         $("#result-box").slideDown();
         //print list of qa tools
         $("#list").empty();
-        for (var i=0; i<qaTools.length; i++) {
-          qaTool = qaTools[i];
+        for (var i=0; i<supportedQATools.length; i++) {
+          qaTool = supportedQATools[i];
           $("<li>"
             +"<h4>"
             +(qaTool.feedUrl?
