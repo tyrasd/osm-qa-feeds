@@ -1,4 +1,4 @@
-[osm-qa-feeds](http://tyrasd.github.io/osm-qa-feeds/)
+[osm-qa-feeds](https://tyrasd.github.io/osm-qa-feeds/)
 ============
 
 A tool to create customized OpenStreetMap quality assurance feeds.
